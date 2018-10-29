@@ -4,6 +4,7 @@ FSJS project 2 - List Filter and Pagination
 Author: Vlad 'hiven' Nadtoka
 ******************************************/
 
+// creates list of links and appends it to the page
 function createPagination(page, listLength) {
   const div = document.createElement('div');
   div.className = 'pagination';
@@ -17,12 +18,14 @@ function createPagination(page, listLength) {
   return ul;
 }
 
+// removes all links in pagination ul
 function clearPagination(pagination) {
   while (pagination.firstChild) {
     pagination.removeChild(pagination.firstChild);
   }
 }
 
+// fills pagination ul with required number of links
 function fillPagination(listLength, pagination) {
   const numberOfPages = Math.ceil(listLength / 10);
   for (let i = 0; i < numberOfPages; i++) {
@@ -36,6 +39,7 @@ function fillPagination(listLength, pagination) {
   }
 }
 
+// creates search and appends it to the page header
 function createSearch(pageHeader) {
   const div = document.createElement('div');
   div.className = 'student-search';
@@ -54,6 +58,7 @@ function createSearch(pageHeader) {
   return div;
 }
 
+// shows correct students depending on page number
 function showPage(list, pageNumber) {
   const startIndex = pageNumber * 10 - 10;
   const endIndex = pageNumber * 10 - 1;
@@ -67,48 +72,76 @@ function showPage(list, pageNumber) {
   }
 }
 
-function showSearchResults(list, searchValue, pagination) {
+// shows search results based on student name and return new student list
+function searchStudents(list, searchValue, pagination) {
   clearPagination(pagination);
-
+  list = document.querySelectorAll('li.student-item'); // reset list
   let foundStudents = [];
-  for (let i = 0; i < list.length; i++) {
-    let name = list[i].getElementsByTagName('h3')[0].textContent;
-    if (name.includes(searchValue)) {
-      foundStudents.push(list[i]);
-      if (list[i].style.display != 'block') list[i].style.display = 'block';
+
+  // if search value is empty string go back to showing the entire list
+  if (searchValue === '') {
+    foundStudents = list;// make sure we go back to displaying whole list of students
+    fillPagination(list.length, pagination);
+    showPage(list, 1);
+  } else {
+    // if student name contains searchValue string add it to array
+    for (let i = 0; i < list.length; i++) {
+      let name = list[i].getElementsByTagName('h3')[0].textContent;
+      if (name.includes(searchValue)) {
+        foundStudents.push(list[i]);
+        if (list[i].style.display != 'block') list[i].style.display = 'block';
+      } else {
+        list[i].style.display = 'none';
+      }
+    }
+
+    if (foundStudents.length > 0) {
+      // if there's an error message from previous search remove it
+      if (document.getElementById('search-error')) {
+        pagination.removeChild(document.getElementById('search-error'));
+      }
+
+      // fill pagination based on array of found students and show first search page
+      fillPagination(foundStudents.length, pagination);
+      showPage(foundStudents, 1);
     } else {
-      list[i].style.display = 'none';
+      const error = document.createElement('h1');
+      error.id = 'search-error';
+      error.textContent = 'No students with provided name have been found!';
+      pagination.appendChild(error);
     }
   }
 
-  fillPagination(foundStudents.length, pagination);
+  return foundStudents;
 }
 
+// don't do anytrhing untill dom content is loaded
 document.addEventListener('DOMContentLoaded', () => {
   const page = document.querySelector('div.page');
   const pageHeader = document.querySelector('div.page-header')
-  const students = document.querySelectorAll('li.student-item');
+  let students = document.querySelectorAll('li.student-item');
   const pagination = createPagination(page, students.length);
   const search = createSearch(pageHeader);
   const searchInput = search.getElementsByTagName('input')[0];
   const searchButton = search.getElementsByTagName('button')[0];
 
+  // keep track of previously highlighted link in pagination
   let previousActiveLink = pagination.firstChild.firstChild;
   previousActiveLink.className = 'active';
-  showPage(students, 1);
+  showPage(students, 1); // show first page on load
 
   pagination.addEventListener('click', (e) => {
-    previousActiveLink.className = '';
-    previousActiveLink = e.target;
-    e.target.className = 'active';
+    previousActiveLink.className = ''; // stop highlighting previous link
+    previousActiveLink = e.target; // update tracking info
+    e.target.className = 'active'; // highlight new link
     showPage(students, parseInt(e.target.textContent));
   });
 
   searchButton.addEventListener('click', () => {
-    showSearchResults(students, searchInput.value, pagination);
+    students = searchStudents(students, searchInput.value, pagination);
   });
 
   searchInput.addEventListener('keyup', () => {
-    showSearchResults(students, searchInput.value, pagination);
+    students = searchStudents(students, searchInput.value, pagination);
   });
 });
