@@ -83,6 +83,7 @@ function searchStudents(list, searchValue, pagination) {
     foundStudents = list;// make sure we go back to displaying whole list of students
     fillPagination(list.length, pagination);
     showPage(list, 1);
+    pagination.firstElementChild.firstElementChild.className = 'active'; // highlight first pagination link
   } else {
     // if student name contains searchValue string add it to array
     for (let i = 0; i < list.length; i++) {
@@ -104,6 +105,7 @@ function searchStudents(list, searchValue, pagination) {
       // fill pagination based on array of found students and show first search page
       fillPagination(foundStudents.length, pagination);
       showPage(foundStudents, 1);
+      pagination.firstElementChild.firstElementChild.className = 'active'; // highlight first pagination link
     } else {
       const error = document.createElement('h1');
       error.id = 'search-error';
