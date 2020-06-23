@@ -1,4 +1,4 @@
-# Pagination and Filtering
+# Student Library
 
 ## About
 This project uses development principle known as "progressive enhancement" to enchance the web page that displays students.
@@ -6,6 +6,3 @@ This project uses development principle known as "progressive enhancement" to en
 Implemented features:
 - Pagination
 - Filtering
-
-## Demo
-This project has publicly available [DEMO](https://ozarkstudios.com/techdegree/techdegree-project-2/)
